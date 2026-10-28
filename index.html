@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <title>Lista de Alunos na disciplina de Linguagem de Programação I</title>
+
+    <style>
+      body { font-family: Arial, sans-serif; margin: 40px; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+      th { background: #f0f0f0; }
+    </style>
+  </head>
+  <body>
+    <h1>Lista de Alunos na disciplina de Linguagem de Programação I</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Matrícula</th><th>Nome</th><th>CPF</th>
+          <th>Celular</th><th>Codigo Curso</th><th>Curso</th>
+        </tr>
+      </thead>
+      <!-- A tag tbody cria o corpo da tabela as linhas serão inseridas pelo ID tabela-alunos 
+       do JavaScript abaixo -->
+      <tbody id="tabela-alunos"></tbody>
+    </table>
+
+    <script>
+      // Função de seta assíncrona: busca os dados no backend (servidor Node) e monta as linhas da tabela
+      async function carregarAlunos() {
+        const tbody = document.getElementById('tabela-alunos');
+
+        try {
+          // fetch faz uma requisição HTTP GET feito via API para o servidor Node
+          // (é um pedido feito por um cliente a um servidor web para buscar e receber dados, 
+          // sem alterar nada no sistema) 
+          const resposta = await fetch('/api/alunos');
+          // .json() converte o texto JSON recebido de volta em array de objetos JavaScript
+          const alunos = await resposta.json();
+
+          if (!resposta.ok) {
+            throw new Error(alunos.erro);
+          }
+
+          // O map percorre o array e gera um array de <tr>; join() concatena tudo numa string só
+          // (mesma ideia que existia no server_junto.js, agora rodando no navegador)
+          tbody.innerHTML = alunos.map(a => `
+            <tr>
+              <td>${a.id_aluno}</td>
+              <td>${a.matricula}</td>
+              <td>${a.nome}</td>
+              <td>${a.cpf}</td>
+              <td>${a.celular ?? ''}</td> 
+            </tr>`).join('');
+        } catch (erro) {
+          
+          // tbody.innerHTML: Substitui todo o conteúdo HTML interno daquele <tbody> pelo novo conteúdo fornecido
+          // erro.message: É uma template string do JavaScript que insere dinamicamente a mensagem do erro 
+          // capturado (por exemplo, em um bloco catch de uma requisição try/catch ou de uma API). 
+            
+          tbody.innerHTML = `<tr><td colspan="6">${erro.message}</td></tr>`;
+        }
+      }
+
+      // Executa a função assim que a página é carregada
+      carregarAlunos();
+    </script>
+  </body>
+</html>
